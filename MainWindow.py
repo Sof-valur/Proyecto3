@@ -1,22 +1,23 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from tkinter import *
-from tkintertable import Tables
+from tkinter import *  
 import webbrowser
 import pdfkit
 import json
 import os
 import datetime
 
-### The purpose of this class is to create objects with the information that a service requires ###
+
+# The purpose of this class is to create objects with the information that a service requires #
 class Servicio:
     def __init__(self, id, descripcion, precio):
         self.id = id
         self.descripcion = descripcion
         self.precio = precio
 
-### The purpose of this class is to create objects with the information that invoice requires ###
+
+# The purpose of this class is to create objects with the information that invoice requires #
 class Factura:
     def __init__(self, customerName, customerEmail, invoiceNumber, sentDate, dueDate, notes, items, subtotal):
         self.customerName = customerName 
@@ -29,8 +30,9 @@ class Factura:
         self.subtotal = subtotal 
         self.tax = subtotal * 0.13
         self.total = self.subtotal + self.tax 
-         
-### The purpose of this function is to retrieve the consecutive of the invoice ###
+
+
+# The purpose of this function is to retrieve the consecutive of the invoice #
 def consecutivoFactura():
     file1 = open('consecutivoFactura.txt', 'r+')
     consecutivo = file1.read(100000000)
@@ -47,7 +49,8 @@ def consecutivoFactura():
     file1.close()
     return consecutivo
 
-### The purpose of this class is to create objects with the properties that an item requires ###
+
+# The purpose of this class is to create objects with the properties that an item requires #
 class Item:
     def __init__(self, id, item, quantity, price, amount):
         self.id = id 
@@ -56,13 +59,15 @@ class Item:
         self.price = price 
         self.amount = amount 
 
-### Global variables ###
+
+# Global variables #
 contadorServicio = 1
 listaServicios = []
 contadorFactura = 1
 listaFactura = []
 
-### This function receives a value and determines if that value is a number ### 
+
+# This function receives a value and determines if that value is a number #
 def esNumero(s):
     try: 
         float(s)
@@ -70,23 +75,21 @@ def esNumero(s):
     except ValueError:
         return False
 
-###  This is the frame in the main page where you can create an invoice ###
+
+#  This is the frame in the main page where you can create an invoice #
 class Realizar_Factura_Frame(ttk.Frame):
  
     def cell(self, event, e = None):
-        '''Identify cell from mouse position'''
         row, col = self.tv_factura.identify_row(e.y), self.tv_factura.identify_column(e.x)
-        pos = self.tv_factura.bbox(row, col)       # Calculate positon of entry
+        pos = self.tv_factura.bbox(row, col)
         return row, col, pos
 
     def single(self, event=None):
-        '''Single click to select row and column'''
         global row, col, pos
         row, col, pos = self.cell(self, event)
         print('Select', row, col)
 
     def ok(self, event=None):
-        '''Validate entry as at loses focus'''
         try:             
             self.tv_factura.set(*item, self.typed.get())    # Set tree cell text
             self.entry.place_forget()            # Remove entry without deleting it
@@ -94,7 +97,7 @@ class Realizar_Factura_Frame(ttk.Frame):
             print('Display Row Cannot be set . . .')
 
     def double(self, event=None, e = None):
-        '''Double click to edit cell'''
+        """Double click to edit a column cell"""
         global row, col, pos, item
         row, col, pos = self.cell(event, event)
         print('Edit', row, col)
@@ -105,7 +108,6 @@ class Realizar_Factura_Frame(ttk.Frame):
         self.entry.focus_set() 
 
     def deleterow(self, event):
-        '''Delete selected row'''
         print('delete', len(self.tv_factura.selection()))
         if len(self.tv_factura.selection()) != 0:
             row = self.tv_factura.selection()[0]
@@ -160,7 +162,7 @@ class Realizar_Factura_Frame(ttk.Frame):
                     self.txt_amount.delete(0, 'end') 
 
                     self.txt_precio.insert(0,servicio.precio) 
-                    self.txt_amount.insert(0,servicio.precio * cantidad)  
+                    self.txt_amount.insert(0,int(servicio.precio) * cantidad)  
                     self.txt_precio.config(state=DISABLED)
                     self.txt_amount.config(state=DISABLED)
                     self.tv_factura.insert("", tk.END, text="" + str(contadorFactura), values=(self.cmb_Item.get(), self.txt_quantity.get(), self.txt_precio.get(), self.txt_amount.get()))
@@ -223,7 +225,6 @@ class Realizar_Factura_Frame(ttk.Frame):
                     listaItems,
                     total) 
 
-        
             f = open('factura.html','wb')
 
             message = """
@@ -310,7 +311,7 @@ class Realizar_Factura_Frame(ttk.Frame):
                 pdfkit.from_url('factura.html', 'facturas/factura' + str(factura.invoiceNumber) + '.pdf', configuration=config)
             except Exception as e:  
                 messagebox.showinfo(title=None, message="Error al generarPDF, por favor cierre el archivo si lo tiene abierto. \n" + str(e)) 
-            webbrowser.open('file://C:/Users/ExtremeTech/source/repos/Proyecto3/facturas/factura' + str(factura.invoiceNumber) + '.pdf')
+            webbrowser.open('file://C:/Users/ExtremeTech/source/repos/Proyecto31/facturas/factura' + str(factura.invoiceNumber) + '.pdf')
          
             data = {} 
             with open('facturas.json') as json_file:
@@ -387,34 +388,34 @@ class Realizar_Factura_Frame(ttk.Frame):
         self.lbl_AgregarItem.pack(side=tk.TOP, expand=True) 
 
         self.sptr_1 = ttk.Separator(self, orient=HORIZONTAL)
-        self.sptr_1.pack(side = TOP, fill = X, padx=5)
+        self.sptr_1.pack(side=TOP, fill=X, padx=5)
 
         self.lbl_descripcion = ttk.Label(self, text="Item") 
         self.lbl_descripcion.pack(side=tk.TOP, fill=tk.X, padx=5)
-        self.cmb_Item = ttk.Combobox(self, value=lista_ID, postcommand = self.refrescarCmb)     
+        self.cmb_Item = ttk.Combobox(self, value=lista_ID, postcommand=self.refrescarCmb)
         self.cmb_Item.pack(side=tk.TOP, fill=tk.X, padx=5)
         #self.cmb_id.bind("<FocusIn>", self.refrescarCmb)
         self.cmb_Item.bind('<<ComboboxSelected>>', self.modified)    
 
         self.lbl_Quantity = ttk.Label(self, text="Quantity") 
         self.lbl_Quantity.pack(side=tk.TOP, fill=tk.X, padx=5)
-        self.txt_quantity = ttk.Entry(self,width=10) 
+        self.txt_quantity = ttk.Entry(self, width=10)
         self.txt_quantity.pack(side=tk.TOP, fill=tk.X, padx=5)
 
         self.lbl_precio = ttk.Label(self, text="Price")
         self.lbl_precio.pack(side=tk.TOP, fill=tk.X, padx=5)
-        self.txt_precio = ttk.Entry(self,width=10, state='disabled')  
+        self.txt_precio = ttk.Entry(self, width=10, state='disabled')
         self.txt_precio.pack(side=tk.TOP, fill=tk.X, padx=5)
 
         self.lbl_amount = ttk.Label(self, text="Amount") 
         self.lbl_amount.pack(side=tk.TOP, fill=tk.X, padx=5)
-        self.txt_amount = ttk.Entry(self,width=10, state='disabled') 
+        self.txt_amount = ttk.Entry(self, width=10, state='disabled')
         self.txt_amount.pack(side=tk.TOP, fill=tk.X, padx=5)
 
-        self.btn_agregar = ttk.Button(self, text="Agregar",command = self.agregarItem)
-        self.btn_agregar.pack(side = TOP, fill = X)
+        self.btn_agregar = ttk.Button(self, text="Agregar", command=self.agregarItem)
+        self.btn_agregar.pack(side=TOP, fill=X)
 
-        self.tv_factura = ttk.Treeview(self, columns=("item","Quantity", "Price", "Amount"))
+        self.tv_factura = ttk.Treeview(self, columns=("item", "Quantity", "Price", "Amount"))
         self.tv_factura.heading("#0", text="#")
         self.tv_factura.column("#0", minwidth=0, width=50, stretch=NO)
         self.tv_factura.heading("item", text="item")
@@ -426,25 +427,26 @@ class Realizar_Factura_Frame(ttk.Frame):
         self.tv_factura.bind('<Double-Button-1>', self.double)
         self.tv_factura.bind("<Delete>", self.deleterow)
 
-        self.btn_crearFactura = ttk.Button(self, text="Crear Factura",command = self.agregarFactura)
-        self.btn_crearFactura.pack(side = BOTTOM, fill = X)
-        self.tv_factura.pack( side = BOTTOM )
+        self.btn_crearFactura = ttk.Button(self, text="Crear Factura", command=self.agregarFactura)
+        self.btn_crearFactura.pack(side=BOTTOM, fill=X)
+        self.tv_factura.pack(side=BOTTOM)
 
         self.typed = tk.StringVar()
         self.entry = ttk.Entry( self.tv_factura, textvariable=self.typed)
         self.entry.bind('<FocusOut>', self.ok) 
 
-class Buscar_Factura_Frame(ttk.Frame): 
- 
 
-    def cell(self, event, e = None):
-        '''Identify cell from mouse position'''
+# This class is for search the invoice with the date #
+class Buscar_Factura_Frame(ttk.Frame): 
+
+    def cell(self, event, e=None):
+        """Identify cell from mouse position"""
         row, col = self.tv_factura.identify_row(e.y), self.tv_factura.identify_column(e.x)
-        pos = self.tv_factura.bbox(row, col)       # Calculate positon of entry
-        return row, col, pos
+        pos = self.tv_factura.bbox(row, col)
+        eeturn row, col, pos
 
     def single(self, event=None):
-        '''Single click to select row and column'''
+        """Single click to select row and column"""
         global row, col, pos
         row, col, pos = self.cell(self, event)
         print('Select', row, col) 
@@ -552,6 +554,8 @@ class Buscar_Factura_Frame(ttk.Frame):
 
         self.getAll()
 
+
+# This class function is to delete an invoice #
 class Eliminar_Factura_Frame(ttk.Frame):
     def refrescarCmb(self):
         global listaServicios
@@ -716,19 +720,19 @@ class PDF_Factura_Frame(ttk.Frame):
                 self.txt_amount.config(state=DISABLED) 
 
     def cell(self, event, e = None):
-        '''Identify cell from mouse position'''
+        """ Identify cell from mouse position """
         row, col = self.tv_factura.identify_row(e.y), self.tv_factura.identify_column(e.x)
         pos = self.tv_factura.bbox(row, col)       # Calculate positon of entry
         return row, col, pos
 
     def single(self, event=None):
-        '''Single click to select row and column'''
+        """ Single click to select row and column """
         global row, col, pos
         row, col, pos = self.cell(self, event)
         print('Select', row, col)
 
     def ok(self, event=None):
-        '''Validate entry as at loses focus'''
+        """ Validate entry as at loses focus """
         try:             
             self.tv_factura.set(*item, self.typed.get())    # Set tree cell text
             self.entry.place_forget()            # Remove entry without deleting it
@@ -736,7 +740,7 @@ class PDF_Factura_Frame(ttk.Frame):
             print('Display Row Cannot be set . . .') 
 
     def deleterow(self, event):
-        '''Delete selected row'''
+        """ Delete selected row """
         deletedRow = 0
         print('delete', len(self.tv_factura.selection()))
         if len(self.tv_factura.selection()) != 0:
@@ -786,12 +790,12 @@ class PDF_Factura_Frame(ttk.Frame):
         return list
 
     def double(self, event=None, e = None):
-        '''Double click to edit cell'''
+        """ Double click to edit cell """
         global row, col, pos, item
         row = self.tv_factura.selection()[0]
         print('Edit', row, col) 
         selectedRow = self.tv_factura.item(row, "values")
-        webbrowser.open('file://C:/Users/ExtremeTech/source/repos/Proyecto3/facturas/factura' + selectedRow[1] + '.pdf')
+        webbrowser.open('file://C:/Users/ExtremeTech/source/repos/Proyecto31/facturas/factura' + selectedRow[1] + '.pdf')
 
     def get_numeroFactura(self,factura):
         return factura[1];
@@ -857,13 +861,13 @@ class FacturaFrame(ttk.Frame):
 class GenerarReportFrame(ttk.Frame):
 
     def cell(self, event, e = None):
-        '''Identify cell from mouse position'''
+        """ Identify cell from mouse position """
         row, col = self.tv_factura.identify_row(e.y), self.tv_factura.identify_column(e.x)
         pos = self.tv_factura.bbox(row, col)       # Calculate positon of entry
         return row, col, pos
 
     def single(self, event=None):
-        '''Single click to select row and column'''
+        """ Single click to select row and column """
         global row, col, pos
         row, col, pos = self.cell(self, event)
         print('Select', row, col) 
@@ -1074,6 +1078,7 @@ class Actualizar_Servicio_Frame(ttk.Frame):
         self.btn_actualizar_servicio = ttk.Button(self, text = "Actualizar", command = self.modificarServicio) 
         self.btn_actualizar_servicio.grid(column=1, row=3) 
 
+
 class ServicioFrame(ttk.Frame): 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) 
@@ -1088,6 +1093,7 @@ class ServicioFrame(ttk.Frame):
             self.Actualizar_Servicio_Frame, text="Actualizar Servicio", padding=10) 
         
         self.notebook.pack(fill='both', padx=1, pady=1)
+
 
 class Application(ttk.Frame): 
     def __init__(self, main_window):
@@ -1111,10 +1117,11 @@ class Application(ttk.Frame):
         self.notebook.pack(fill='both',padx=1, pady=1, anchor = "s")
         self.pack(fill='both')
 
-listaServicios.append(Servicio(90, "Cortar zacate", 456)) 
-listaServicios.append(Servicio(91, "Podar arbustos", 456)) 
-listaServicios.append(Servicio(92, "Podar arboles", 456)) 
-listaServicios.append(Servicio(93, "Combo 1", 456)) 
+# The Services #
+listaServicios.append(Servicio(90, "Cortar zacate", 2000))
+listaServicios.append(Servicio(91, "Podar arbustos", 5000))
+listaServicios.append(Servicio(92, "Podar arboles", 6000))
+listaServicios.append(Servicio(93, "Combo 1", 10000))
 main_window = tk.Tk()
 app = Application(main_window)
 app.mainloop()
